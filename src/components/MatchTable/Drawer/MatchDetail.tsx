@@ -2,6 +2,7 @@ import {
     Badge,
     Divider,
     Group,
+    SimpleGrid,
     Stack,
     Text,
     Title,
@@ -14,52 +15,70 @@ interface MatchDetailProps {
 
 export default function MatchDetail({ match }: MatchDetailProps) {
     return (
-        <Stack>
+        <Stack gap="lg">
             <Group justify="space-between">
                 <Title order={3}>
                     {match.team1} vs {match.team2}
                 </Title>
 
-                <Badge size="lg">
-                    {match.score1} - {match.score2}
-                </Badge>
+                <Group>
+                    <Badge>Mundial {match.world_cup_year}</Badge>
+                    <Badge color="grape">{match.stage}</Badge>
+                </Group>
             </Group>
 
             <Divider />
 
-            <Text>
-                <b>Fecha:</b> {match.date}
-            </Text>
+            <Group justify="space-around" align="center">
+                <Stack align="center" gap={0}>
+                    <Text c="dimmed" size="lg">
+                        {match.team1}
+                    </Text>
 
-            <Text>
-                <b>Año:</b> {match.world_cup_year}
-            </Text>
+                    <Title order={1}>{match.score1}</Title>
+                </Stack>
 
-            <Text>
-                <b>Fase:</b> {match.stage}
-            </Text>
+                <Title order={2}>-</Title>
 
-            <Text>
-                <b>Grupo:</b> {match.group || "-"}
-            </Text>
+                <Stack align="center" gap={0}>
+                    <Text c="dimmed" size="lg">
+                        {match.team2}
+                    </Text>
 
-            <Text>
-                <b>Ciudad:</b> {match.city}
-            </Text>
+                    <Title order={1}>{match.score2}</Title>
+                </Stack>
+            </Group>
 
-            <Text>
-                <b>Estadio:</b> {match.stadium}
-            </Text>
+            <Divider />
 
-            <Text>
-                <b>Asistencia:</b>{" "}
-                {match.attendance.toLocaleString()}
-            </Text>
+            <SimpleGrid cols={2} spacing="md">
+                <Text c="dimmed">Fecha</Text>
+                <Text ta="right">{match.date}</Text>
+
+                <Text c="dimmed">Grupo</Text>
+                <Text ta="right">{match.group || "-"}</Text>
+
+                <Text c="dimmed">Estadio</Text>
+                <Text ta="right">{match.stadium}</Text>
+
+                <Text c="dimmed">Ciudad</Text>
+                <Text ta="right">{match.city}</Text>
+
+                <Text c="dimmed">Asistencia</Text>
+                <Text ta="right">
+                    {match.attendance.toLocaleString()}
+                </Text>
+            </SimpleGrid>
 
             {match.obs && (
-                <Text>
-                    <b>Observaciones:</b> {match.obs}
-                </Text>
+                <>
+                    <Divider
+                        label="Observaciones"
+                        labelPosition="left"
+                    />
+
+                    <Text>{match.obs}</Text>
+                </>
             )}
         </Stack>
     );
