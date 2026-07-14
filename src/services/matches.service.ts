@@ -10,8 +10,9 @@ import type { Match } from "../types/Match";
  * @throws An error if the network response is not successful.
  */
 export async function getMatches(): Promise<Match[]> {
-    const response = await fetch("/data/worldcup_matches.json");
-
+    const response = await fetch(
+        `${import.meta.env.BASE_URL}data/worldcup_matches.json`
+    );
     if (!response.ok) {
         throw new Error("Error loading matches");
     }
