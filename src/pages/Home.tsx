@@ -1,20 +1,20 @@
-import { Container, Title } from "@mantine/core";
+import { Container, Group } from "@mantine/core";
 import { useMatches } from "../hooks/useMatches";
-import MatchTable from "../components/MatchTable/MatchTable";
+import AppTabs from "../components/Tabs/Tabs";
+import ThemeToggle from "../components/ThemeToggle/ThemeToggle";
 
 export default function Home() {
-    const { matches, loading } = useMatches();
+    const { matches } = useMatches();
 
     return (
-        <Container size="xl" py="xl">
-            <Title mb="lg">
-                FIFA World Cup History
-            </Title>
+        <>
+            <Group justify="flex-end" p="md" pb={0}>
+                <ThemeToggle />
+            </Group>
 
-            {loading ? (
-                "Loading..."
-            ) : (
-                <MatchTable matches={matches} />)}
-        </Container>
+            <Container size="xl" py="xl">
+                <AppTabs matches={matches} />
+            </Container>
+        </>
     );
 }
