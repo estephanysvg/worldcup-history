@@ -1,181 +1,103 @@
-import { useEffect, useMemo, useState } from "react";
-import { Badge, Button, MultiSelect, Select } from "@mantine/core";
-import { DataTable, type DataTableSortStatus } from "mantine-datatable";
-import type { Match } from "../../types/Match";
-import { parseMatchDate } from "../../utils/date";
-import { TextInput } from "@mantine/core";
-import { IconSearch, IconMoodLookDown, IconExternalLink } from "@tabler/icons-react";
-import { Drawer } from "@mantine/core";
-import MatchDetail from "./Drawer/MatchDetail";
-import { useDisclosure } from "@mantine/hooks";
+// React
+import React, { useState } from "react";
 
+// Components
+import {
+    Badge,
+    Button,
+    Drawer,
+    MultiSelect,
+    Select,
+    TextInput,
+} from "@mantine/core";
+import { DataTable } from "mantine-datatable";
+import MatchDetail from "./Drawer/MatchDetail";
+
+// Hooks
+import { useDisclosure } from "@mantine/hooks";
+import { useFilters } from "../../hooks/useFilters";
+
+// Types
+import type { Match } from "../../types/Match";
+
+// Styles
+import {
+    IconExternalLink,
+    IconMoodLookDown,
+    IconSearch,
+} from "@tabler/icons-react";
+
+// #region Types
+
+/**
+ * Props for the MatchTable component.
+ */
 interface MatchTableProps {
+    /** List of World Cup matches. */
     matches: Match[];
 }
 
-const PAGE_SIZE = 15;
+// #endregion
 
-export default function MatchTable({ matches }: MatchTableProps) {
-    const [records, setRecords] = useState<Match[]>(matches);
+// #region Components
 
-    console.log(matches.length)
-    const [paginatedRecords, setPaginatedRecords] = useState<Match[]>([]);
-    const [page, setPage] = useState(1);
-
-    const [sortStatus, setSortStatus] = useState<DataTableSortStatus<Match>>({
-        columnAccessor: "date",
-        direction: "asc",
-    });
-
-    const [search, setSearch] = useState("");
-
-    // Filtros
-    const [selectedYear, setSelectedYear] = useState<string | null>(null);
-    const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
-    const [selectedStage, setSelectedStage] = useState<string | null>(null);
-    const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
-    const [selectedCity, setSelectedCity] = useState<string | null>(null);
-    const [selectedStadium, setSelectedStadium] = useState<string | null>(null);
-
-
-    const [opened, { open, close }] = useDisclosure(false);
-    const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
-    // Opciones de los filtros
-    const years = useMemo(
-        () =>
-            [...new Set(matches.map((m) => String(m.world_cup_year)))].sort(),
-        [matches]
-    );
-
-    const teams = useMemo(
-        () =>
-            [...new Set(matches.flatMap((m) => [m.team1, m.team2]))].sort(),
-        [matches]
-    );
-
-    const stages = useMemo(
-        () => [...new Set(matches.map((m) => m.stage))].sort(),
-        [matches]
-    );
-
-    const groups = useMemo(
-        () =>
-            [...new Set(matches.map((m) => m.group).filter(Boolean))].sort(),
-        [matches]
-    );
-
-    const cities = useMemo(
-        () => [...new Set(matches.map((m) => m.city))].sort(),
-        [matches]
-    );
-
-    const stadiums = useMemo(
-        () => [...new Set(matches.map((m) => m.stadium))].sort(),
-        [matches]
-    );
-
-    useEffect(() => {
-        let filtered = [...matches];
-
-        if (search.trim() !== "") {
-            const query = search.toLowerCase();
-
-            filtered = filtered.filter(
-                (m) =>
-                    m.team1.toLowerCase().includes(query) ||
-                    m.team2.toLowerCase().includes(query)
-            );
-        }
-
-        if (selectedYear) {
-            filtered = filtered.filter(
-                (m) => m.world_cup_year === Number(selectedYear)
-            );
-        }
-
-        if (selectedTeams.length) {
-            filtered = filtered.filter(
-                (m) =>
-                    selectedTeams.includes(m.team1) ||
-                    selectedTeams.includes(m.team2)
-            );
-        }
-
-        if (selectedStage) {
-            filtered = filtered.filter((m) => m.stage === selectedStage);
-        }
-
-        if (selectedGroup) {
-            filtered = filtered.filter((m) => m.group === selectedGroup);
-        }
-
-        if (selectedCity) {
-            filtered = filtered.filter((m) => m.city === selectedCity);
-        }
-
-        if (selectedStadium) {
-            filtered = filtered.filter((m) => m.stadium === selectedStadium);
-        }
-
-        filtered.sort((a, b) => {
-            let comparison = 0;
-
-            switch (sortStatus.columnAccessor) {
-                case "date":
-                    comparison =
-                        parseMatchDate(a.date).getTime() -
-                        parseMatchDate(b.date).getTime();
-                    break;
-
-                case "world_cup_year":
-                    comparison = a.world_cup_year - b.world_cup_year;
-                    break;
-
-                case "goals":
-                    comparison =
-                        a.score1 + a.score2 - (b.score1 + b.score2);
-                    break;
-
-                default:
-                    comparison = 0;
-            }
-
-            return sortStatus.direction === "asc"
-                ? comparison
-                : -comparison;
-        });
-
-        setRecords(filtered);
-        setPage(1);
-    }, [
-        matches,
-        sortStatus,
-        selectedYear,
-        selectedTeams,
-        selectedStage,
-        selectedGroup,
-        selectedCity,
-        selectedStadium,
+/**
+ * MatchTable renders an interactive data table of all World Cup matches
+ * with robust searching, pagination, custom column sorting, and filters.
+ * Clicking a match row detail action displays detailed specs in a drawer.
+ *
+ * @param props - Component props containing the matches data.
+ * @returns The rendered match table and its details drawer.
+ */
+export default function MatchTable({ matches }: MatchTableProps): React.JSX.Element {
+    // Utilize custom hook to manage search, sorting, filtering, and pagination
+    const {
         search,
-    ]);
+        setSearch,
+        selectedYear,
+        setSelectedYear,
+        selectedTeams,
+        setSelectedTeams,
+        selectedStage,
+        setSelectedStage,
+        selectedGroup,
+        setSelectedGroup,
+        selectedCity,
+        setSelectedCity,
+        selectedStadium,
+        setSelectedStadium,
+        sortStatus,
+        setSortStatus,
+        page,
+        setPage,
+        years,
+        teams,
+        stages,
+        groups,
+        cities,
+        stadiums,
+        records,
+        paginatedRecords,
+        pageSize,
+    } = useFilters(matches);
 
-    useEffect(() => {
-        const from = (page - 1) * PAGE_SIZE;
-        const to = from + PAGE_SIZE;
-
-        setPaginatedRecords(records.slice(from, to));
-    }, [page, records]);
+    // Local state for managing details drawer view
+    const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
+    const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
 
     return (
         <>
+            {/* Search Input Field */}
             <TextInput
                 mb="md"
-                w="300"
+                w={300}
                 placeholder="Buscar equipo..."
                 value={search}
                 onChange={(e) => setSearch(e.currentTarget.value)}
                 leftSection={<IconSearch size={16} />}
             />
+
+            {/* Match Data Table */}
             <DataTable
                 withTableBorder
                 borderRadius="md"
@@ -184,7 +106,7 @@ export default function MatchTable({ matches }: MatchTableProps) {
                 highlightOnHover
                 records={paginatedRecords}
                 totalRecords={records.length}
-                recordsPerPage={PAGE_SIZE}
+                recordsPerPage={pageSize}
                 page={page}
                 onPageChange={setPage}
                 sortStatus={sortStatus}
@@ -204,9 +126,7 @@ export default function MatchTable({ matches }: MatchTableProps) {
                             <Select
                                 data={years}
                                 value={selectedYear}
-                                onChange={(value) => {
-                                    setSelectedYear(value as string | null);
-                                }}
+                                onChange={(value) => setSelectedYear(value)}
                                 placeholder="Todos"
                                 clearable
                                 comboboxProps={{ withinPortal: false }}
@@ -256,9 +176,7 @@ export default function MatchTable({ matches }: MatchTableProps) {
                             <Select
                                 data={stages}
                                 value={selectedStage}
-                                onChange={(value) => {
-                                    setSelectedStage(value as string | null);
-                                }}
+                                onChange={(value) => setSelectedStage(value)}
                                 placeholder="Todas"
                                 clearable
                                 comboboxProps={{ withinPortal: false }}
@@ -273,9 +191,7 @@ export default function MatchTable({ matches }: MatchTableProps) {
                             <Select
                                 data={groups}
                                 value={selectedGroup}
-                                onChange={(value) => {
-                                    setSelectedGroup(value as string | null);
-                                }}
+                                onChange={(value) => setSelectedGroup(value)}
                                 placeholder="Todos"
                                 clearable
                                 comboboxProps={{ withinPortal: false }}
@@ -290,9 +206,7 @@ export default function MatchTable({ matches }: MatchTableProps) {
                             <Select
                                 data={cities}
                                 value={selectedCity}
-                                onChange={(value) => {
-                                    setSelectedCity(value as string | null);
-                                }}
+                                onChange={(value) => setSelectedCity(value)}
                                 placeholder="Todas"
                                 clearable
                                 searchable
@@ -308,9 +222,7 @@ export default function MatchTable({ matches }: MatchTableProps) {
                             <Select
                                 data={stadiums}
                                 value={selectedStadium}
-                                onChange={(value) => {
-                                    setSelectedStadium(value as string | null);
-                                }}
+                                onChange={(value) => setSelectedStadium(value)}
                                 placeholder="Todos"
                                 clearable
                                 searchable
@@ -322,14 +234,14 @@ export default function MatchTable({ matches }: MatchTableProps) {
                         accessor: "actions",
                         title: "",
                         render: (match) => (
-
                             <Button
                                 variant="transparent"
                                 style={{ cursor: "pointer" }}
                                 onClick={() => {
                                     setSelectedMatch(match);
-                                    open();
-                                }}>
+                                    openDrawer();
+                                }}
+                            >
                                 <IconExternalLink size={18} />
                             </Button>
                         ),
@@ -339,9 +251,10 @@ export default function MatchTable({ matches }: MatchTableProps) {
                 noRecordsText="No hay resultados que coincidan con la búsqueda."
             />
 
+            {/* Sidebar Drawer displaying Match Details */}
             <Drawer
-                opened={opened}
-                onClose={close}
+                opened={drawerOpened}
+                onClose={closeDrawer}
                 title="Detalle del partido"
                 position="right"
                 size="lg"
@@ -353,6 +266,7 @@ export default function MatchTable({ matches }: MatchTableProps) {
                 {selectedMatch && <MatchDetail match={selectedMatch} />}
             </Drawer>
         </>
-
     );
-} 
+}
+
+// #endregion

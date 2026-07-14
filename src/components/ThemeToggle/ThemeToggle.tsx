@@ -1,12 +1,26 @@
+// React
+import React from "react";
+
+// Components
 import {
     ActionIcon,
     Tooltip,
     useComputedColorScheme,
     useMantineColorScheme,
 } from "@mantine/core";
+
+// Styles
 import { IconMoon, IconSun } from "@tabler/icons-react";
 
-export default function ThemeToggle() {
+// #region Components
+
+/**
+ * ThemeToggle renders a button that toggles the color scheme of the application
+ * between light and dark modes, with a descriptive tooltip.
+ *
+ * @returns The action icon button with tooltips for theme toggling.
+ */
+export default function ThemeToggle(): React.JSX.Element {
     const { setColorScheme } = useMantineColorScheme();
     const colorScheme = useComputedColorScheme("light");
 
@@ -38,3 +52,5 @@ export default function ThemeToggle() {
         </Tooltip>
     );
 }
+
+// #endregion
