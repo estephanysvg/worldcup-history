@@ -168,7 +168,7 @@ export default function Dashboard({ matches }: DashboardProps): React.JSX.Elemen
             {/* Bottom Row: Teams and Rivalries Bar Charts */}
             <SimpleGrid cols={{ base: 1, lg: 2 }}>
                 {/* Top Teams Chart */}
-                <Card withBorder shadow="sm" radius="md" p="lg">
+                <Card withBorder shadow="sm" radius="md" p="xl">
                     <Group justify="space-between" mb="md">
                         <Title order={4}>Top 5 equipos con más goles</Title>
                         <ThemeIcon color="green" variant="light">
@@ -179,7 +179,7 @@ export default function Dashboard({ matches }: DashboardProps): React.JSX.Elemen
                 </Card>
 
                 {/* Top Rivalries Chart */}
-                <Card withBorder shadow="sm" radius="md" p="lg">
+                <Card withBorder shadow="sm" radius="md" p="xl">
                     <Group justify="space-between" mb="md">
                         <Title order={4}>Enfrentamientos más repetidos</Title>
                         <ThemeIcon color="orange" variant="light">
